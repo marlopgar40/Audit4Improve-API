@@ -1,7 +1,9 @@
 package us.muit.fs.a4i.test.model.remote;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+import java.util.Collections;
 import java.util.logging.Logger;
 
 import org.junit.jupiter.api.AfterAll;
@@ -9,61 +11,61 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import us.muit.fs.a4i.exceptions.MetricException;
 import us.muit.fs.a4i.model.entities.ReportItem;
+import us.muit.fs.a4i.model.remote.GitHubOrganizationEnquirer;
 import us.muit.fs.a4i.model.remote.GitHubRepositoryEnquirer;
-
+import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GitHub;
+import org.kohsuke.github.GHIssueState;
 
 class GitHubRepositoryEnquirerTest {
-	
-	private static Logger log = Logger.getLogger(GitHubRepositoryEnquirerTest.class.getName());
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@BeforeAll
-	static void setUpBeforeClass() throws Exception {
-	}
+    private static Logger log = Logger.getLogger(GitHubRepositoryEnquirerTest.class.getName());
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@AfterAll
-	static void tearDownAfterClass() throws Exception {
-	}
+    @Mock
+    private GitHub gitHub;
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@BeforeEach
-	void setUp() throws Exception {
-	}
+    @Mock
+    private GHRepository ghRepository;
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@AfterEach
-	void tearDown() throws Exception {
-	}
+    @InjectMocks
+    private GitHubRepositoryEnquirer enquirer;
 
-	/**
-	 * @throws MetricException
-	 */
-	@Test
-	void testGetTotalPullRequests() throws MetricException {
-		
-		System.out.println("Valor real de la ");
-		log.info("dfds");
-		ReportItem metrica = null;
-		int numPullRequests = 20; 
-        GitHubRepositoryEnquirer enquirer = new GitHubRepositoryEnquirer();
-        metrica = enquirer.getMetric("pullResquestTotales", "MIT-FS/Audit4Improve-API");
+    @BeforeAll
+    static void setUpBeforeClass() throws Exception {
+    }
+
+    @AfterAll
+    static void tearDownAfterClass() throws Exception {
+    }
+
+    @BeforeEach
+    void setUp() throws Exception {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @AfterEach
+    void tearDown() throws Exception {
+    }
+
+    @Test
+    void testGetTotalPullRequests() throws MetricException {
+        String repositoryId = "MIT-FS/Audit4Improve-API";
+        String metricName = "issues";
+        int numPullRequests = 20;
+
+        when(gitHub.getRepository(repositoryId)).thenReturn(ghRepository);
+        when(ghRepository.getIssues(GHIssueState.ALL)).thenReturn(Collections.nCopies(numPullRequests, new Object()));
+
+        ReportItem metrica = enquirer.getMetric(metricName, repositoryId);
+
         log.info(metrica.toString());
         System.out.println("Valor real de la métrica 'issues': " + metrica.getValue());
         assertEquals(numPullRequests, metrica.getValue());
-		
-	}
-	
-
+    }
 }
